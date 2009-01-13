@@ -1,3 +1,4 @@
+Changes
 LICENSE
 MANIFEST
 META.yml
@@ -8,5 +9,6 @@ t/000-load.t
 t/001-basic-matching.t
 t/002-complicated-matching.t
 t/003-methods.t
+t/004-submatching.t
 t/100-collection.t
 t/101-parameterized.t

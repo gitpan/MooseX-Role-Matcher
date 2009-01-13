@@ -1,6 +1,6 @@
 #!/usr/bin/perl
 package MooseX::Role::Matcher;
-our $VERSION = '0.01';
+our $VERSION = '0.02';
 
 use MooseX::Role::Parameterized;
 use List::Util qw/first/;
@@ -13,7 +13,7 @@ MooseX::Role::Matcher - generic object matching based on attributes and methods
 
 =head1 VERSION
 
-version 0.01
+version 0.02
 
 =head1 SYNOPSIS
 
@@ -170,6 +170,12 @@ method _match => sub {
         for (@$seek) {
             return 1 if $self->_match($value => $_);
         }
+        return 0;
+    }
+    if (ref($seek) eq 'HASH') {
+        return 0 unless blessed($value) &&
+                        $value->does('MooseX::Role::Matcher');
+        return $value->match(%$seek);
     }
     return $value eq $seek;
 };
@@ -210,6 +216,12 @@ method by this name, otherwise returns false.
 Matches the result of the method against each element in the arrayref as
 described above, returning true if any of the submatches return true, and false
 otherwise.
+
+=item HASHREF
+
+If the method does not return an object which does MooseX::Role::Matcher,
+returns false. Otherwise, returns the result of calling C<match> on the
+returned object, with the contents of the hashref as arguments.
 
 =back
 
