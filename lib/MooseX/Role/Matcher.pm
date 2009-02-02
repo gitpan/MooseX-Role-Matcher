@@ -1,6 +1,6 @@
 #!/usr/bin/perl
 package MooseX::Role::Matcher;
-our $VERSION = '0.02';
+our $VERSION = '0.03';
 
 use MooseX::Role::Parameterized;
 use List::Util qw/first/;
@@ -13,7 +13,7 @@ MooseX::Role::Matcher - generic object matching based on attributes and methods
 
 =head1 VERSION
 
-version 0.02
+version 0.03
 
 =head1 SYNOPSIS
 
@@ -73,7 +73,6 @@ C<< $obj->match('bar') >> rather than C<< $obj->match(foo => 'bar') >>.
 =cut
 
 parameter default_match => (
-    is  => 'ro',
     isa => 'Str',
 );
 
@@ -159,20 +158,29 @@ method _match => sub {
     my $value = shift;
     my $seek = shift;
 
-    return !defined $value if !defined $seek;
-    return 0 if !defined $value;
-    return $value =~ $seek if ref($seek) eq 'Regexp';
-    if (ref($seek) eq 'CODE') {
+    # first check seek types that could match undef
+    if (!defined $seek) {
+        return !defined $value;
+    }
+    elsif (ref($seek) eq 'CODE') {
         local $_ = $value;
         return $seek->();
     }
-    if (ref($seek) eq 'ARRAY') {
+    elsif (ref($seek) eq 'ARRAY') {
         for (@$seek) {
             return 1 if $self->_match($value => $_);
         }
         return 0;
     }
-    if (ref($seek) eq 'HASH') {
+    # then bail out if we still have an undef value
+    elsif (!defined $value) {
+        return 0;
+    }
+    # and now check seek types that would error with an undef value
+    elsif (ref($seek) eq 'Regexp') {
+        return $value =~ $seek;
+    }
+    elsif (ref($seek) eq 'HASH') {
         return 0 unless blessed($value) &&
                         $value->does('MooseX::Role::Matcher');
         return $value->match(%$seek);
