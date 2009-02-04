@@ -12,3 +12,4 @@ t/003-methods.t
 t/004-submatching.t
 t/100-collection.t
 t/101-parameterized.t
+t/102-missing.t

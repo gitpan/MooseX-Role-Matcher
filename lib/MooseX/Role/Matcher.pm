@@ -1,19 +1,18 @@
 #!/usr/bin/perl
 package MooseX::Role::Matcher;
-our $VERSION = '0.03';
+our $VERSION = '0.04';
 
 use MooseX::Role::Parameterized;
 use List::Util qw/first/;
 use List::MoreUtils qw/any all/;
 
-# ABSTRACT: generic object matching based on attributes and methods
 =head1 NAME
 
 MooseX::Role::Matcher - generic object matching based on attributes and methods
 
 =head1 VERSION
 
-version 0.03
+version 0.04
 
 =head1 SYNOPSIS
 
@@ -76,9 +75,14 @@ parameter default_match => (
     isa => 'Str',
 );
 
+parameter allow_missing_methods => (
+    isa => 'Bool',
+);
+
 role {
 my $p = shift;
 my $default = $p->default_match;
+my $allow_missing_methods = $p->allow_missing_methods;
 
 method _apply_to_matches => sub {
     my $class = shift;
@@ -246,6 +250,8 @@ method match => sub {
     # immediately if a false condition is found.
     for my $matcher (keys %args) {
         my ($invert, $name) = $matcher =~ /^(!)?(.*)$/;
+        confess blessed($self) . " has no method named $name"
+            unless $self->can($name) || $allow_missing_methods;
         my $value = $self->can($name) ? $self->$name : undef;
         my $seek = $args{$matcher};
 
