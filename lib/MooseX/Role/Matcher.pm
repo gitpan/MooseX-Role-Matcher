@@ -1,6 +1,6 @@
 #!/usr/bin/perl
 package MooseX::Role::Matcher;
-our $VERSION = '0.04';
+our $VERSION = '0.05';
 
 use MooseX::Role::Parameterized;
 use List::Util qw/first/;
@@ -12,7 +12,7 @@ MooseX::Role::Matcher - generic object matching based on attributes and methods
 
 =head1 VERSION
 
-version 0.04
+version 0.05
 
 =head1 SYNOPSIS
 
@@ -38,7 +38,7 @@ version 0.04
   my @not_twenty_two = Person->grep_matches([@people], '!age' => 22);
 
   # do any of the 22-year-olds have a phone number ending in 4?
-  Person->any_match([@people], age => 22, number => qr/4$/);
+  Person->any_match([@people], age => 22, phone => qr/4$/);
 
   # does everyone's name start with either J or E?
   Person->all_match([@people], name => [qr/^J/, qr/^E/]);
@@ -66,6 +66,10 @@ L<MooseX::Role::Parameterized>). The parameters it takes are:
 Which attribute/method to test against by default, if none are specified
 explicitly. Setting default_match to 'foo' allows using
 C<< $obj->match('bar') >> rather than C<< $obj->match(foo => 'bar') >>.
+
+=item allow_missing_methods
+
+If set to true, matching against a method that doesn't exist is treated as though matching against undef. Otherwise, the match call dies.
 
 =back
 
@@ -278,7 +282,7 @@ no MooseX::Role::Parameterized;
 
 =head1 COPYRIGHT AND LICENSE
 
-This software is copyright (c) 2008 by Jesse Luehrs.
+This software is copyright (c) 2008-2009 by Jesse Luehrs.
 
 This is free software; you can redistribute it and/or modify it under
 the same terms as perl itself.
